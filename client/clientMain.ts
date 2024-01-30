@@ -62,6 +62,9 @@ mainClient.on("data",(data:string)=>{
         dataClient.connect(PORT,HOST,()=>{
             console.log("dataClient connected server!")
         })
+    }else if (getData.type === "set_system_mode_2"){
+        systemMode = getData.data
+        mainClient.write(setFormat("done_set_all_systemMode","mainClient","upload"))
     }else if (systemMode === "upload"){
         if (getData.type === "start_upload"){
             console.log("リクエストが成功しました")
@@ -74,6 +77,9 @@ mainClient.on("data",(data:string)=>{
             mainClient.write(setFormat("start_send_packet","mainClient","done"))
         }else if (getData.type === "start_send_packet_2"){
             NextSendFile()
+        }else if (getData.type === "done_set_all_systemMode_2"){
+            console.log("動いてはいる")
+            mainClient.write(setFormat("start_upload_settings","mainClient","start"))
         }
     }else if (systemMode === "download"){
         if (getData.type === "start_download"){
@@ -112,6 +118,8 @@ dataClient.on("data",(data:string)=>{
             console.log(userId)
             dataClient.write(setFormat("send_client_info","dataClient",{data:"dataClient",userId:userId,systemMode:systemMode}))
         }else if (getData.type === "conection_done_dataClient"){
+            console.log("現況")
+            console.log(systemMode)
             if (systemMode === "upload"){
                 if (targetsInfo.mainTarget){
                     console.log("startうｐ")
@@ -125,8 +133,12 @@ dataClient.on("data",(data:string)=>{
             //if コマンドがuploadだった場合
             //systemModeをmainTargetのクライアントにも設定する
             systemMode = "upload"
-            mainClient.write(setFormat("set_system_mode_1","mainClient","uplaod"))
+            if (!targetsInfo.mainTarget){
+                dataClientFirstFlg = false
+            }
+            mainClient.write(setFormat("set_system_mode_1","mainClient","upload"))
             // mainClient.write(setFormat("start_upload_settings","mainClient","start"))
+
         }
     }else{
         console.log("subTargetからデータを受け取りました")
