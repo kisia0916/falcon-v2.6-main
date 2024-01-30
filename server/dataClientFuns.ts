@@ -8,6 +8,7 @@ export const dataClientFun = (data:any,targetInfo:targetsInfoInterface,mainClien
     if (systemMode === "upload"){
         targetId = targetInfo.mainTarget
     }else if (systemMode === "download"){
+        console.log(targetInfo)
         targetId = targetInfo.subTarget
     }
     console.log(Buffer.isBuffer(data))
@@ -30,7 +31,11 @@ export const dataClientFun = (data:any,targetInfo:targetsInfoInterface,mainClien
                 console.log("すべてのパケットを取得しました")
                 const targetDataClientIndex = clientList.findIndex((i)=>i.userId === targetId)
                 // console.log(targetDataClientIndex)
-
+                console.log(systemMode)
+                console.log(mainClientUserId)
+                console.log(targetId)
+                console.log(targetInfo.mainTarget)
+                console.log(targetInfo.subTarget)
                 if (targetDataClientIndex !== -1){
                     console.log("次のパケットを送信します")
                     console.log(Buffer.concat(getDataCacheList).length)

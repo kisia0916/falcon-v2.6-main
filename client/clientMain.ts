@@ -8,7 +8,7 @@ export const mainClient = new net.Socket()
 export const dataClient = new net.Socket()
 
 // const HOST = "0.tcp.jp.ngrok.io"
-// const PORT = 17745
+// const PORT = 16266
 const HOST = "localhost"
 const PORT = 3000
 let sendFile:string = "./testFiles/sendData.exe"
@@ -64,7 +64,7 @@ mainClient.on("data",(data:string)=>{
         })
     }else if (getData.type === "set_system_mode_2"){
         systemMode = getData.data
-        mainClient.write(setFormat("done_set_all_systemMode","mainClient","upload"))
+        mainClient.write(setFormat("done_set_all_systemMode","mainClient",getData.data))
     }else if (systemMode === "upload"){
         if (getData.type === "start_upload"){
             console.log("リクエストが成功しました")
@@ -99,10 +99,13 @@ mainClient.on("data",(data:string)=>{
             console.log(`rast packet size is ${rastPacketSize}`)
             mainClient.write(setFormat("start_send_packet","mainClient","done"))
         }else if (getData.type === "start_send_packet_2"){
+            console.log(targetsInfo)
             console.log("うけとり")
             NextSendFile()
         }else if (getData.type === "send_next_reqest"){
             NextSendFile()
+        }else if (getData.type === "done_set_all_systemMode_2"){
+            mainClient.write(setFormat("start_download_settings","mainClient","start"))
         }
     }
 })
@@ -132,12 +135,20 @@ dataClient.on("data",(data:string)=>{
         }else if (getData.type === "testsig"){
             //if コマンドがuploadだった場合
             //systemModeをmainTargetのクライアントにも設定する
+            ///////////////////////
             systemMode = "upload"
             if (!targetsInfo.mainTarget){
                 dataClientFirstFlg = false
             }
-            mainClient.write(setFormat("set_system_mode_1","mainClient","upload"))
-            // mainClient.write(setFormat("start_upload_settings","mainClient","start"))
+            mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:"upload"}))
+            //////////////////
+            // systemMode = "download"
+            // console.log("dff")
+            // if (!targetsInfo.mainTarget){
+            //     dataClientFirstFlg = false
+            // }
+            // mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:"download",targetsInfo:targetsInfo}))
+            /////////////////
 
         }
     }else{

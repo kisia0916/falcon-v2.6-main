@@ -61,6 +61,8 @@ server.on("connection",(socket)=>{
             getData = JSON.parse(data)
         }else{
             getData = data
+            console.log("はははは")
+            console.log(targetsInfo)
             dataClientFun(data,targetsInfo,mainClientId,systemMode)
         }
         if (changeJsonFlg){
@@ -81,6 +83,8 @@ server.on("connection",(socket)=>{
                         mainClientId = getData.data.userId
                         clientList[clientIndex].dataClientSocket = socket
                         targetsInfo = clientList[clientIndex].targetInfo//dataClientにターゲットの情報を設定
+                        console.log("hikanjkin")
+                        console.log(targetsInfo)
                         changeJsonFlg = false
                         socket.write(setFormat("testsig","server","done"))
                     }
@@ -102,26 +106,42 @@ server.on("connection",(socket)=>{
             }else if (getData.type === "done_connection_mainTarget"){
                     const subTargetIndex = clientList.findIndex((i)=>i.userId === getData.data)
                     targetsInfo.subTarget = getData.data
+                    const clientIndex = clientList.findIndex((i)=>i.userId === userId)
+                    if (clientIndex !== -1 && systemMode === "download"){
+                        clientList[clientIndex].targetInfo.subTarget = getData.data
+                    }
                     clientList[subTargetIndex].mainClientSocket.write(setFormat("connection_mainTarget_dataClient","server","start"))
             }else if (getData.type === "start_upload_settings"){
                 //データをjsonに変換させないようにする
                 const myIndex = clientList.findIndex((i)=>i.userId === userId)
-                console.log("kkkkkk")
-                console.log(userId)
                 if (myIndex !== -1){
-                    // console.log(clientList[myIndex])
                     changeJsonFlg = true
-                    console.log("sendddd")
+                    clientList[myIndex].dataClientSocket.write(setFormat("conection_done_dataClient","server","done"))
+                }
+            }else if(getData.type === "start_download_settings"){
+                const myIndex = clientList.findIndex((i)=>i.userId === userId)
+                if (myIndex !== -1){
+                    changeJsonFlg = true
                     clientList[myIndex].dataClientSocket.write(setFormat("conection_done_dataClient","server","done"))
                 }
             }else if (getData.type === "set_system_mode_1"){
-                systemMode = getData.data//clientlistのsystemMode変更
+                systemMode = getData.data.systemMode//clientlistのsystemMode変更
                 const mainTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.mainTarget)
                 const myIndex = clientList.findIndex((i)=>i.userId === userId)
-                if (mainTargetIndex !== -1 && myIndex !== -1){
-                    clientList[mainTargetIndex].systemMode = getData.data
-                    clientList[myIndex].systemMode = getData.data
-                    clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_system_mode_2","server","upload"))
+                console.log(myIndex)
+                console.log(getData.data)
+                if (systemMode === "upload"){
+                    if (mainTargetIndex !== -1 && myIndex !== -1){
+                        clientList[mainTargetIndex].systemMode = getData.data.systemMode
+                        clientList[myIndex].systemMode = getData.data.systemMode
+                        clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_system_mode_2","server","upload"))
+                    }
+                }else if (systemMode === "download"){
+                    if (mainTargetIndex !== -1 && myIndex !== -1){
+                        clientList[mainTargetIndex].systemMode = getData.data.systemMode
+                        clientList[myIndex].systemMode = getData.data.systemMode
+                        clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_system_mode_2","server","download"))
+                    }
                 }
             }else if (systemMode === "upload"){
                 if (getData.type === "done_write_mainTargetFile"){
@@ -155,20 +175,11 @@ server.on("connection",(socket)=>{
                 }else if (getData.type === "done_set_all_systemMode"){
                     const subTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.subTarget)
                     if (subTargetIndex !== -1){
-                        clientList[subTargetIndex].mainClientSocket.write(setFormat("done_set_all_systemMode_2","server","upload"))
+                        clientList[subTargetIndex].mainClientSocket.write(setFormat("done_set_all_systemMode_2","server",getData.data))
                     }
                 }
             }else if (systemMode === "download"){
-                if (getData.type === "done_connection_mainTarget"){
-                    const subTargetIndex = clientList.findIndex((i)=>i.userId === getData.data)
-                    targetsInfo.subTarget = getData.data
-                    const clientIndex = clientList.findIndex((i)=>i.userId === userId)
-                    if (clientIndex !== -1){
-                        console.log("OMG")
-                        clientList[clientIndex].targetInfo.subTarget = getData.data
-                    }
-                    clientList[subTargetIndex].mainClientSocket.write(setFormat("start_download","server","start"))
-                }else if (getData.type === "send_download_path_main"){
+                if (getData.type === "send_download_path_main"){
                     const mainTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.mainTarget)
                     if (mainTargetIndex !== -1){
                         clientList[mainTargetIndex].mainClientSocket.write(setFormat("send_download_path_sub","server",getData.data))
@@ -197,6 +208,11 @@ server.on("connection",(socket)=>{
                     const mainTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.mainTarget)
                     if (mainTargetIndex !== -1){
                         clientList[mainTargetIndex].mainClientSocket.write(setFormat("send_next_reqest","server","done"))
+                    }
+                }else if (getData.type === "done_set_all_systemMode"){
+                    const subTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.subTarget)
+                    if (subTargetIndex !== -1){
+                        clientList[subTargetIndex].mainClientSocket.write(setFormat("done_set_all_systemMode_2","server",getData.data))
                     }
                 }
             }
