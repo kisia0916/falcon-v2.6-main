@@ -3,7 +3,7 @@ import { clientList, rastPacketInfoInterface, sendDataSplitSize, targetsInfoInte
 let getDataCacheList:any[] = []
 let rastPacketInfo:rastPacketInfoInterface|undefined = undefined
 let packetCounter:number = 0
-export const dataClientFun = (data:any,targetInfo:targetsInfoInterface,mainClientUserId:string,systemMode:string)=>{
+export const dataClientFun = (data:any,targetInfo:targetsInfoInterface,mainClientUserId:string,systemMode:string,resetServerParams:any)=>{
     let targetId:string = ""
     if (systemMode === "upload"){
         targetId = targetInfo.mainTarget
@@ -55,6 +55,11 @@ export const dataClientFun = (data:any,targetInfo:targetsInfoInterface,mainClien
                 }
                 getDataCacheList = []
                 packetCounter +=1
+                packetCounter = 0
+                rastPacketInfo = undefined
+                console.log(mainClientUserId)
+                console.log("じゅじっつ")
+                resetServerParams()
             }
         }
     }else{

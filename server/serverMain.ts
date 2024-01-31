@@ -29,8 +29,6 @@ export interface rastPacketInfoInterface {
 export let clientList:clientListInterface[] = []
 export const sendDataSplitSize = 102400
 
-
-
 server.on("connection",(socket)=>{
     let userId:string = ""
     let clientType:string = ""
@@ -39,7 +37,18 @@ server.on("connection",(socket)=>{
     let systemMode:"upload"|"download"|"" = ""
 
     let changeJsonFlg = true
+    let allResetFlg:boolean = false
     let targetsInfo:targetsInfoInterface = {mainTarget:"",subTarget:""}//mainは自分から接続しに行ったクライアントでsubは相手から接続してきたクライアント
+    const resetServerParams = ()=>{
+        rastPacketSize = 0
+        systemMode = ""
+        changeJsonFlg = true
+        const myIndex = clientList.findIndex((i)=>i.userId === userId)
+        if (myIndex !== -1){
+            clientList[myIndex].rastPacketInfo = {rastPacketSize:0,splitDataListLength:0}
+            clientList[myIndex].systemMode = ""
+        }
+    }
     socket.write(setFormat("first_send","server",""))
 
     socket.on("data",(data:string)=>{
@@ -54,16 +63,16 @@ server.on("connection",(socket)=>{
             console.log(myIndex)
             systemMode = clientList[myIndex].systemMode as "upload"|"download"|""
         }
+        
         console.log(systemMode)
         if (changeJsonFlg){
-            console.log(userId)
-            console.log(changeJsonFlg)
+
             getData = JSON.parse(data)
         }else{
             getData = data
             console.log("はははは")
             console.log(targetsInfo)
-            dataClientFun(data,targetsInfo,mainClientId,systemMode)
+            dataClientFun(data,targetsInfo,mainClientId,systemMode,resetServerParams)
         }
         if (changeJsonFlg){
             if (getData.type === "send_client_info"){
@@ -74,8 +83,8 @@ server.on("connection",(socket)=>{
                     clientList.push({userId:userId,mainClientSocket:socket,dataClientSocket:undefined,targetInfo:{mainTarget:"",subTarget:""},rastPacketInfo:{rastPacketSize:0,splitDataListLength:0},systemMode:""})
                     socket.write(setFormat("send_server_userId","server",userId))
                 }else if (getData.data.data === "dataClient"){
-
                     console.log("動いてるよ")
+                    console.log("sys")
                     console.log(getData.data.userId)
                     const clientIndex = clientList.findIndex((i)=>i.userId === getData.data.userId)
                     // systemMode = getData.data.systemMode
@@ -85,7 +94,7 @@ server.on("connection",(socket)=>{
                         targetsInfo = clientList[clientIndex].targetInfo//dataClientにターゲットの情報を設定
                         console.log("hikanjkin")
                         console.log(targetsInfo)
-                        changeJsonFlg = false
+                        // changeJsonFlg = false
                         socket.write(setFormat("testsig","server","done"))
                     }
                 }
@@ -95,7 +104,6 @@ server.on("connection",(socket)=>{
                     clientList[clientIndex].targetInfo.mainTarget = getData.data.mainTarget
                 }
                 targetsInfo.mainTarget = getData.data.mainTarget
-
                 //mainTargetに接続リクエストを送信
                 const mainTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.mainTarget)
                 if (mainTargetIndex !== -1){
@@ -143,6 +151,12 @@ server.on("connection",(socket)=>{
                         clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_system_mode_2","server","download"))
                     }
                 }
+            }else if (getData.type === "set_change_json_flg"){
+                changeJsonFlg = false
+                console.log("ikento")
+                socket.write(setFormat("set_done_change_flg","server",getData.data.systemMode))
+            }else if (getData.data === "reset_logic"){
+                resetServerParams()
             }else if (systemMode === "upload"){
                 if (getData.type === "done_write_mainTargetFile"){
                     console.log("jkfldsjaklfjdasoiejfoiw")

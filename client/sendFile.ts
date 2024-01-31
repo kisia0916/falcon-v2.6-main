@@ -1,5 +1,5 @@
 import * as fs from "fs"
-import { dataClient, mainClient, sendDataSplitSize } from "./clientMain"
+import { dataClient, mainClient, resetClientParams, sendDataSplitSize, userId } from "./clientMain"
 import { setFormat } from "../protocol/sendFormat"
 import { readRateAniRun } from "./textLog"
 let splitDataList:any[] = []
@@ -13,11 +13,9 @@ export let nowSendedSize:number = 0
 const openFile = (path:string)=>{
     fs.open(path,"r",(err,fd)=>{
         fileFd = fd
-        // console.log("open")
         fileSize = fs.statSync(path).size
         splitNum = Math.ceil(fileSize/sendDataSplitSize)
         rastPacketSize = fileSize%sendDataSplitSize
-        // console.log(rastPacketSize)
         mainClient.write(setFormat("send_rast_packet_size","mainClient",{rastPacketSize:rastPacketSize,splitDataListLength:splitNum}))
         readRateAniRun("Uploading file",fileSize)
     })
@@ -32,23 +30,32 @@ export const NextSendFile = ()=>{
     if (splitDataCounter+1 !== splitNum){
         fs.read(fileFd,buffer,0,sendDataSplitSize,splitDataCounter*sendDataSplitSize,(err, bytesRead, buffer)=>{
             sendData(buffer)
-            // console.log(splitDataCounter*sendDataSplitSize)
             nowSendedSize = splitDataCounter*sendDataSplitSize
-
         })
     }else{
         buffer = Buffer.alloc(rastPacketSize)
         fs.read(fileFd,buffer,0,rastPacketSize,splitDataCounter*sendDataSplitSize,(err, bytesRead, buffer)=>{
             sendData(buffer)
-            // console.log(splitDataCounter*sendDataSplitSize)
             nowSendedSize = fileSize
+            console.log("うごうご")
+            console.log(userId)
+            mainClient.write(setFormat("","mainClient","reset_logic"))
+            dataClient.write(setFormat("","mainClient","reset_logic"))
+            resetClientParams()
         })
     }
 }
 
 export const sendData = (data:any)=>{
-    // console.log(splitDataList.length)
-    // console.log(data.length)
     dataClient.write(data)
     splitDataCounter+=1
+}
+
+export const resetParams = ()=>{
+    fileFd = undefined
+    splitDataCounter = 0
+    splitNum = 0
+    rastPacketSize = 0
+    fileSize = 0
+    nowSendedSize = 0
 }

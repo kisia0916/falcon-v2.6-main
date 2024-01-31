@@ -1,7 +1,7 @@
 import * as net from "net"
 import * as fs from "fs"
 import { setFormat } from "../protocol/sendFormat"
-import { NextSendFile, firstSendSetting} from "./sendFile"
+import { NextSendFile, firstSendSetting, resetParams} from "./sendFile"
 import { loadTextAniRun } from "./textLog"
 
 export const mainClient = new net.Socket()
@@ -25,7 +25,7 @@ interface targetsInfoInterface {
     subTarget:string,
 }
 
-let userId:string = ""
+export let userId:string = ""
 let targetsInfo:targetsInfoInterface = {mainTarget:"",subTarget:""}//mainは自分から接続しに行ったクライアントでsubは相手から接続してきたクライアント
 
 export const sendDataSplitSize = 102400
@@ -136,19 +136,31 @@ dataClient.on("data",(data:string)=>{
             //if コマンドがuploadだった場合
             //systemModeをmainTargetのクライアントにも設定する
             ///////////////////////
-            systemMode = "upload"
-            if (!targetsInfo.mainTarget){
-                dataClientFirstFlg = false
-            }
-            mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:"upload"}))
-            //////////////////
-            // systemMode = "download"
-            // console.log("dff")
+            // systemMode = "upload"
             // if (!targetsInfo.mainTarget){
             //     dataClientFirstFlg = false
             // }
-            // mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:"download",targetsInfo:targetsInfo}))
+            // if (targetsInfo.mainTarget){
+            //     dataClient.write(setFormat("set_change_json_flg","dataClient",{systemMode:systemMode}))
+            // }else{
+            //     mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:"upload"}))
+            // }
+            //////////////////
+            systemMode = "download"
+            if (!targetsInfo.mainTarget){
+                dataClient.write(setFormat("set_change_json_flg","dataClient",{systemMode:systemMode}))
+            }else{
+                mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:"download",targetsInfo:targetsInfo}))
+            }
             /////////////////
+
+        }else if (getData.type === "set_done_change_flg"){
+            if (systemMode === "upload"){
+                mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:getData.data}))
+            }else if (systemMode === "download"){
+                dataClientFirstFlg = false
+                mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:getData.data,targetsInfo:targetsInfo}))
+            }
 
         }
     }else{
@@ -175,13 +187,24 @@ dataClient.on("data",(data:string)=>{
                     // mainClient.write(setFormat("done_write_mainTargetFile","dataClient","done"))
                     getDataCacheList = []
                     packetCounter+=1
+                    resetClientParams()
+                    mainClient.write(setFormat("","mainClient","reset_logic"))
+                    dataClient.write(setFormat("","mainClient","reset_logic"))
+
                 })
 
             }
         }
     }
 })
-
+export const resetClientParams = ()=>{
+    packetCounter = 0
+    rastPacketSize = 0
+    splitDataListLength = 0
+    systemMode = undefined
+    dataClientFirstFlg = true
+    resetParams()
+}
 export let doneConnectionFlg:boolean = false
 loadTextAniRun(`Connecting to ${HOST}:${PORT}`)
 mainClient.connect(PORT,HOST,()=>{
