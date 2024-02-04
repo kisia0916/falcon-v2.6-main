@@ -33,6 +33,7 @@ export let rastPacketSize:number = 0
 export let splitDataListLength:number = 0
 export let packetCounter:number = 0
 export let systemMode:"upload"|"download"|undefined = undefined
+let doneLogicCounter:number = 0
 
 
 mainClient.on("data",(data:string)=>{
@@ -65,7 +66,28 @@ mainClient.on("data",(data:string)=>{
     }else if (getData.type === "set_system_mode_2"){
         systemMode = getData.data
         mainClient.write(setFormat("done_set_all_systemMode","mainClient",getData.data))
-    }else if (systemMode === "upload"){
+    }else if (getData.type === "done_all_logic"){
+        doneLogicCounter+=1
+        console.log(`${doneLogicCounter}`+"unnko")
+        if (doneLogicCounter === 4){
+            console.log("all logic done")
+            systemMode = "upload"
+            dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
+            doneLogicCounter = 0
+        }
+    }else if (getData.type === "set_change_flg_sec_client"){
+        // dataClientFirstFlg = false
+        dataClient.write(setFormat("set_change_flg_sec_server","server","set"))
+    }else if (getData.type === "set_data_change_flg_sec_client"){
+        dataClientFirstFlg = false
+        console.log("下田")
+        dataClient.write(setFormat("set_change_flg_sec_server","server","data_change"))
+    }else if (getData.type === "all_set_changeFlg"){
+        // dataClientFirstFlg = false
+        console.log("all flg change done")
+        mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:systemMode,targetsInfo:targetsInfo}))
+    }
+    else if (systemMode === "upload"){
         if (getData.type === "start_upload"){
             console.log("リクエストが成功しました")
         }else if (getData.type === "send_next_reqest"){
@@ -105,6 +127,7 @@ mainClient.on("data",(data:string)=>{
         }else if (getData.type === "send_next_reqest"){
             NextSendFile()
         }else if (getData.type === "done_set_all_systemMode_2"){
+            console.log("動いてはいる2")
             mainClient.write(setFormat("start_download_settings","mainClient","start"))
         }
     }
@@ -119,6 +142,7 @@ dataClient.on("data",(data:string)=>{
         if (getData.type === "first_send"){
             console.log("firstsendを取得しました")
             console.log(userId)
+            let changeFlg :boolean = false
             dataClient.write(setFormat("send_client_info","dataClient",{data:"dataClient",userId:userId,systemMode:systemMode}))
         }else if (getData.type === "conection_done_dataClient"){
             console.log("現況")
@@ -148,6 +172,7 @@ dataClient.on("data",(data:string)=>{
             //////////////////
             systemMode = "download"
             if (!targetsInfo.mainTarget){
+                console.log("嬉野")
                 dataClient.write(setFormat("set_change_json_flg","dataClient",{systemMode:systemMode}))
             }else{
                 mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:"download",targetsInfo:targetsInfo}))
@@ -161,7 +186,6 @@ dataClient.on("data",(data:string)=>{
                 dataClientFirstFlg = false
                 mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:getData.data,targetsInfo:targetsInfo}))
             }
-
         }
     }else{
         console.log("subTargetからデータを受け取りました")
