@@ -167,12 +167,12 @@ server.on("connection",(socket)=>{
                     const myIndex = clientList.findIndex((i)=>i.userId === myId)
                     console.log(myIndex)
                     if (myIndex !== -1){
-                        clientList[myIndex].mainClientSocket.write(setFormat("done_all_logic","server","done"))
+                        clientList[myIndex].mainClientSocket.write(setFormat("done_all_logic","server",userId?"main"+userId:"data"+mainClientId))
                     }
                 }else if (targetsInfo.subTarget){
                     const subTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.subTarget)
                     if (subTargetIndex !== -1){
-                        clientList[subTargetIndex].mainClientSocket.write(setFormat("done_all_logic","server","done"))
+                        clientList[subTargetIndex].mainClientSocket.write(setFormat("done_all_logic","server",userId?"main"+userId:"data"+mainClientId))
                     }
                 }
             }else if (getData.type === "set_change_flg_sec"){

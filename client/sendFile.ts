@@ -37,11 +37,9 @@ export const NextSendFile = ()=>{
         fs.read(fileFd,buffer,0,rastPacketSize,splitDataCounter*sendDataSplitSize,(err, bytesRead, buffer)=>{
             sendData(buffer)
             nowSendedSize = fileSize
-            console.log("うごうご")
-            console.log(userId)
+            resetClientParams()
             mainClient.write(setFormat("","mainClient","reset_logic"))
             dataClient.write(setFormat("","mainClient","reset_logic"))
-            resetClientParams()
         })
     }
 }
@@ -52,10 +50,10 @@ export const sendData = (data:any)=>{
 }
 
 export const resetParams = ()=>{
+    nowSendedSize = 0
     fileFd = undefined
     splitDataCounter = 0
     splitNum = 0
     rastPacketSize = 0
     fileSize = 0
-    nowSendedSize = 0
 }

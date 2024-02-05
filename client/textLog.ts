@@ -42,8 +42,6 @@ const readRateAni = (beforeText:string)=>{
         process.stdout.write(`${beforeText} [${writeBox}]${nowRate}%\r`)
         setTimeout(()=>readRateAni(beforeText),10)
     }else if (nowContentSize>=maxSizeMain){
-        console.log(`${beforeText} [${writeBox}]${nowRate}%`)
-        console.log("\x1b[32mUpload done!"+"\x1b[39m")
         nowContentSize+=1
     }
 }
