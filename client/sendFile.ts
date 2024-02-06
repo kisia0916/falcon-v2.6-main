@@ -17,7 +17,7 @@ const openFile = (path:string)=>{
         splitNum = Math.ceil(fileSize/sendDataSplitSize)
         rastPacketSize = fileSize%sendDataSplitSize
         mainClient.write(setFormat("send_rast_packet_size","mainClient",{rastPacketSize:rastPacketSize,splitDataListLength:splitNum}))
-        readRateAniRun("Uploading file",fileSize)
+        readRateAniRun("Uploading file",fileSize,"upload")
     })
 }
 

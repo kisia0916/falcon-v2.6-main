@@ -1,4 +1,4 @@
-import { doneConnectionFlg } from "./clientMain";
+import { doneConnectionFlg, packetCounter } from "./clientMain";
 import { nowSendedSize } from "./sendFile";
 
 process.stdout.write( "\x1b[?25l" );
@@ -24,6 +24,7 @@ export const loadTextAniRun = (beforeText:string)=>{
 //
 const loadBoxNum = 20
 let maxSizeMain = 0
+let beforePa:number = 0
 // let nowContentSize = 0
 const readRateAni = (beforeText:string)=>{
     let nowContentSize = nowSendedSize
@@ -38,17 +39,60 @@ const readRateAni = (beforeText:string)=>{
             }
         }
     }
-    if (maxSizeMain>nowContentSize){
-        process.stdout.write(`${beforeText} [${writeBox}]${nowRate}%\r`)
-        setTimeout(()=>readRateAni(beforeText),10)
-    }else if (nowContentSize>=maxSizeMain){
-        nowContentSize+=1
+    if ((nowRate === 0 && beforePa === 100) === false){
+        if (maxSizeMain>nowContentSize){
+            process.stdout.write(`${beforeText} [${writeBox}]${nowRate}%\r`)
+            setTimeout(()=>readRateAni(beforeText),10)
+        }else if (nowContentSize>=maxSizeMain){
+            nowContentSize+=1
+        }
     }
+    beforePa = nowRate
 }
 
-export const readRateAniRun = (beforeText:string,maxSize:number)=>{
+const readRateAni2 = (beforeText:string)=>{
+
+    let nowContentSize = packetCounter
+    const nowRate = Math.ceil((nowContentSize/maxSizeMain)*100)
+    let writeBox = ""
+    if (maxSizeMain+1>=nowContentSize){
+        for (let i = 0;loadBoxNum>i;i++){
+            if (i+1 <=(nowRate/10)*(loadBoxNum/10)){
+                writeBox+="■"
+            }else{
+                writeBox+="□"
+            }
+        }
+    }
+    if ((nowRate < beforePa) === false){
+        if (maxSizeMain>nowContentSize){
+            process.stdout.write(`${beforeText} [${writeBox}]${nowRate}%\r`)
+            setTimeout(()=>readRateAni2(beforeText),10)
+        }else if (nowContentSize>=maxSizeMain){
+            nowContentSize+=1
+        }
+    }
+    beforePa = nowRate
+}
+
+
+export const rastLoadWrite = (beforeText:string)=>{
+    let box:string = ""
+    for (let i = 0;loadBoxNum>i;i++){
+        box+="■"
+    }
+    console.log(`${beforeText} [${box}]100%`)
+    console.log("\x1b[32mUpload done!"+"\x1b[39m")
+}
+
+export const readRateAniRun = (beforeText:string,maxSize:number,systemMode:"upload"|"download")=>{
     maxSizeMain = maxSize
-    setTimeout(()=>readRateAni(beforeText),10)
+    beforePa = 0
+    if (systemMode === "upload"){
+        setTimeout(()=>readRateAni(beforeText),10)
+    }else if (systemMode === "download"){
+        setTimeout(()=>readRateAni2(beforeText),10)
+    }
 }
 // readRateAniRun("lll")
 // loadTextAniRun("loading...")

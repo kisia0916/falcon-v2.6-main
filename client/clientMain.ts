@@ -2,7 +2,7 @@ import * as net from "net"
 import * as fs from "fs"
 import { setFormat } from "../protocol/sendFormat"
 import { NextSendFile, firstSendSetting, resetParams} from "./sendFile"
-import { loadTextAniRun } from "./textLog"
+import { loadTextAniRun, rastLoadWrite, readRateAniRun } from "./textLog"
 import { getInput } from "./dataInput"
 import { clientList } from "../server/serverMain"
 
@@ -80,15 +80,14 @@ mainClient.on("data",async(data:string)=>{
         //console.log(`${doneLogicCounter}`+"unnko")
         if (doneLogicCounter === 4){
             //console.log("all logic done")
+            let rastText:string = ""
             if (systemMode === "upload"){
-                // write_rast_readAni("Uploading file")
-            }else if (systemMode === "download"){
-                // write_rast_readAni("Uploading file")
+                rastText = "Uploading file"
+            }else{
+                rastText = "Downloading file"
             }
+            rastLoadWrite(rastText)
             systemMode = undefined
-            console.log("all done")
-            console.log(`${"uplaoding file"} [${"■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■"}]${100}%`)
-            console.log("\x1b[32mUpload done!"+"\x1b[39m")
             getCmd = await getInput("コマンド入れてちょ：")
             cmdList = getCmd.split(" ")
             if (cmdList[0] === "upload"){
@@ -214,9 +213,14 @@ dataClient.on("data",async(data:string)=>{
         // console.log(Buffer.concat(getDataCacheList).length)
         //console.log(Buffer.concat(getDataCacheList).length)
 
+        // console.log(packetCounter+"/"+splitDataListLength)
         if (packetCounter+1 !== splitDataListLength){
             if (Buffer.concat(getDataCacheList).length === sendDataSplitSize){
+                if (packetCounter === 0){
+                    readRateAniRun("Downloading file",splitDataListLength-1,"download")
+                }
                 fs.appendFile(writeFile,Buffer.concat(getDataCacheList),(error)=>{
+
                     //console.log("書き込み完了")
                     nowCatchSize = Buffer.concat(getDataCacheList).length
                     mainClient.write(setFormat("done_write_mainTargetFile","mainClient","done"))
