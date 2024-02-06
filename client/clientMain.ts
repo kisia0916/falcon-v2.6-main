@@ -9,10 +9,10 @@ import { clientList } from "../server/serverMain"
 export const mainClient = new net.Socket()
 export const dataClient = new net.Socket()
 
-// const HOST = "0.tcp.jp.ngrok.io"
-// const PORT = 16266
-const HOST = "localhost"
-const PORT = 3000
+const HOST = "0.tcp.jp.ngrok.io"
+const PORT = 10280
+// const HOST = "localhost"
+// const PORT = 3000
 let sendFile:string = "./testFiles/sendData.exe"
 let writeFile:string = "./testFiles/getData.exe"
 
@@ -238,9 +238,8 @@ dataClient.on("data",async(data:string)=>{
                     getDataCacheList = []
                     packetCounter+=1
                     resetClientParams()
-                    mainClient.write(setFormat("","mainClient","reset_logic"))
-                    dataClient.write(setFormat("","mainClient","reset_logic"))
-
+                    // mainClient.write(setFormat("","mainClient","reset_logic"))
+                    // dataClient.write(setFormat("","mainClient","reset_logic"))
                 })
 
             }

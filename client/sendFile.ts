@@ -38,8 +38,8 @@ export const NextSendFile = ()=>{
             sendData(buffer)
             nowSendedSize = fileSize
             resetClientParams()
-            mainClient.write(setFormat("","mainClient","reset_logic"))
-            dataClient.write(setFormat("","mainClient","reset_logic"))
+            // mainClient.write(setFormat("","mainClient","reset_logic"))
+            // dataClient.write(setFormat("","mainClient","reset_logic"))
         })
     }
 }
