@@ -157,25 +157,30 @@ server.on("connection",(socket)=>{
                 changeJsonFlg = false
                 console.log("ikento")
                 socket.write(setFormat("set_done_change_flg","server",getData.data.systemMode))
-            }else if (getData.data === "reset_logic"){
-                userId?console.log(userId):console.log(mainClientId)
-                console.log("done all data test")
-                console.log(clientType)
-                resetServerParams()            
-                if (targetsInfo.mainTarget){
-                    const myId = userId?userId:mainClientId
-                    const myIndex = clientList.findIndex((i)=>i.userId === myId)
-                    console.log(myIndex)
+            }else if (getData.type === "done_rast_logic"){
+                if (getData.data === "mainClient"){
+                    const myIndex = clientList.findIndex((i)=>i.userId === userId)
                     if (myIndex !== -1){
-                        clientList[myIndex].mainClientSocket.write(setFormat("done_all_logic","server",userId?"main"+userId:"data"+mainClientId))
+                        clientList[myIndex].mainClientSocket.write(setFormat("done_rast_logic_1","server",""))
                     }
-                }else if (targetsInfo.subTarget){
-                    const subTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.subTarget)
-                    if (subTargetIndex !== -1){
-                        clientList[subTargetIndex].mainClientSocket.write(setFormat("done_all_logic","server",userId?"main"+userId:"data"+mainClientId))
+                    resetServerParams() 
+                }else if (getData.data === "dataClient"){
+                    if (targetsInfo.mainTarget){
+                        const myIndex = clientList.findIndex((i)=>i.userId === mainClientId)
+                        if (myIndex !== -1){
+                            clientList[myIndex].mainClientSocket.write(setFormat("done_all_logic","server",""))
+                        }
+                        resetServerParams() 
+                    }else if (targetsInfo.subTarget){
+                        const subTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.subTarget)
+                        if (subTargetIndex !== -1){
+                            clientList[subTargetIndex].mainClientSocket.write(setFormat("done_all_logic","server",""))
+                        }
+                        resetServerParams() 
                     }
                 }
-            }else if (getData.type === "set_change_flg_sec"){
+            }
+            else if (getData.type === "set_change_flg_sec"){
                 ///dataClient用
                 if (getData.data === "upload"){
                     changeJsonFlg = false

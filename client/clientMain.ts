@@ -9,10 +9,10 @@ import { clientList } from "../server/serverMain"
 export const mainClient = new net.Socket()
 export const dataClient = new net.Socket()
 
-const HOST = "0.tcp.jp.ngrok.io"
-const PORT = 10280
-// const HOST = "localhost"
-// const PORT = 3000
+// const HOST = "0.tcp.jp.ngrok.io"
+// const PORT = 10280
+const HOST = "localhost"
+const PORT = 3000
 let sendFile:string = "./testFiles/sendData.exe"
 let writeFile:string = "./testFiles/getData.exe"
 
@@ -78,7 +78,7 @@ mainClient.on("data",async(data:string)=>{
     }else if (getData.type === "done_all_logic"){
         doneLogicCounter+=1
         //console.log(`${doneLogicCounter}`+"unnko")
-        if (doneLogicCounter === 4){
+        if (doneLogicCounter === 2){
             //console.log("all logic done")
             let rastText:string = ""
             if (systemMode === "upload"){
@@ -112,6 +112,8 @@ mainClient.on("data",async(data:string)=>{
         // dataClientFirstFlg = false
         //console.log("all flg change done")
         mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:systemMode,targetsInfo:targetsInfo}))
+    }else if (getData.type === "done_rast_logic_1"){
+        dataClient.write(setFormat("done_rast_logic","dataClient","dataClient"))
     }
     else if (systemMode === "upload"){
         if (getData.type === "start_upload"){
@@ -238,6 +240,7 @@ dataClient.on("data",async(data:string)=>{
                     getDataCacheList = []
                     packetCounter+=1
                     resetClientParams()
+                    mainClient.write(setFormat("done_rast_logic","mainClient","mainClient"))
                     // mainClient.write(setFormat("","mainClient","reset_logic"))
                     // dataClient.write(setFormat("","mainClient","reset_logic"))
                 })
