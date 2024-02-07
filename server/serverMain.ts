@@ -160,15 +160,21 @@ server.on("connection",(socket)=>{
             }else if (getData.type === "done_rast_logic"){
                 if (getData.data === "mainClient"){
                     const myIndex = clientList.findIndex((i)=>i.userId === userId)
-                    if (myIndex !== -1){
-                        clientList[myIndex].mainClientSocket.write(setFormat("done_rast_logic_1","server",""))
+                    if (targetsInfo.mainTarget){
+                        if (myIndex !== -1){
+                            clientList[myIndex].mainClientSocket.write(setFormat("done_rast_logic_1","server",""))
+                        }
+                    }else if (targetsInfo.subTarget){
+                        if (myIndex !== -1){
+                            clientList[myIndex].mainClientSocket.write(setFormat("done_rast_logic_1","server",""))
+                        }
                     }
                     resetServerParams() 
                 }else if (getData.data === "dataClient"){
                     if (targetsInfo.mainTarget){
-                        const myIndex = clientList.findIndex((i)=>i.userId === mainClientId)
-                        if (myIndex !== -1){
-                            clientList[myIndex].mainClientSocket.write(setFormat("done_all_logic","server",""))
+                        const mainTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.mainTarget)
+                        if (mainTargetIndex !== -1){
+                            clientList[mainTargetIndex].mainClientSocket.write(setFormat("done_all_logic_2","server",""))
                         }
                         resetServerParams() 
                     }else if (targetsInfo.subTarget){

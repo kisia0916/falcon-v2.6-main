@@ -10,7 +10,7 @@ export const mainClient = new net.Socket()
 export const dataClient = new net.Socket()
 
 // const HOST = "0.tcp.jp.ngrok.io"
-// const PORT = 10280
+// const PORT = 11720
 const HOST = "localhost"
 const PORT = 3000
 let sendFile:string = "./testFiles/sendData.exe"
@@ -78,29 +78,27 @@ mainClient.on("data",async(data:string)=>{
     }else if (getData.type === "done_all_logic"){
         doneLogicCounter+=1
         //console.log(`${doneLogicCounter}`+"unnko")
-        if (doneLogicCounter === 2){
             //console.log("all logic done")
-            let rastText:string = ""
-            if (systemMode === "upload"){
-                rastText = "Uploading file"
-            }else{
-                rastText = "Downloading file"
-            }
-            rastLoadWrite(rastText)
-            systemMode = undefined
-            getCmd = await getInput("コマンド入れてちょ：")
-            cmdList = getCmd.split(" ")
-            if (cmdList[0] === "upload"){
-                systemMode = "upload"
-                dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
-            }else if (cmdList[0] === "download"){
-                systemMode = "download"
-                dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
-            }
-            getCmd = ""
-            cmdList = []
-            doneLogicCounter = 0
+        let rastText:string = ""
+        if (systemMode === "upload"){
+            rastText = "Uploading file"
+        }else{
+            rastText = "Downloading file"
         }
+        rastLoadWrite(rastText)
+        systemMode = undefined
+        getCmd = await getInput("コマンド入れてちょ：")
+        cmdList = getCmd.split(" ")
+        if (cmdList[0] === "upload"){
+            systemMode = "upload"
+            dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
+        }else if (cmdList[0] === "download"){
+            systemMode = "download"
+            dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
+        }
+        getCmd = ""
+        cmdList = []
+        doneLogicCounter = 0
     }else if (getData.type === "set_change_flg_sec_client"){
         // dataClientFirstFlg = false
         dataClient.write(setFormat("set_change_flg_sec_server","server","set"))
@@ -114,6 +112,8 @@ mainClient.on("data",async(data:string)=>{
         mainClient.write(setFormat("set_system_mode_1","mainClient",{systemMode:systemMode,targetsInfo:targetsInfo}))
     }else if (getData.type === "done_rast_logic_1"){
         dataClient.write(setFormat("done_rast_logic","dataClient","dataClient"))
+    }else if (getData.type === "done_all_logic_2"){
+        mainClient.write(setFormat("done_rast_logic","mainClient","mainClient"))
     }
     else if (systemMode === "upload"){
         if (getData.type === "start_upload"){

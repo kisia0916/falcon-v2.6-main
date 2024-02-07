@@ -38,7 +38,7 @@ export const NextSendFile = ()=>{
             sendData(buffer)
             nowSendedSize = fileSize
             resetClientParams()
-            mainClient.write(setFormat("done_rast_logic","mainClient","mainClient"))
+            // mainClient.write(setFormat("done_rast_logic","mainClient","mainClient"))
             // mainClient.write(setFormat("","mainClient","reset_logic"))
             // dataClient.write(setFormat("","mainClient","reset_logic"))
         })
