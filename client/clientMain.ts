@@ -50,12 +50,16 @@ mainClient.on("data",async(data:string)=>{
     if (getData.type === "first_send"){
         mainClient.write(setFormat("send_client_info","mainClient",{data:"mainClient",systemMode:systemMode}))
     }else if (getData.type === "send_server_userId"){
-        userId = getData.data
+        userId = getData.data.userId
         console.log(`my userId is ${userId}`)
         //本番ではここを標準入力にする
-        targetsInfo.mainTarget = fs.readFileSync("./testFiles/target.txt","utf-8")
+        // targetsInfo.mainTarget = fs.readFileSync("./testFiles/target.txt","utf-8")
+        console.log(getData.data.userList)
+        let getIndex:any = await getInput("Select Target : ")
+        if (getIndex){
+            targetsInfo.mainTarget = getData.data.userList[getIndex-1]
+        }
         if (targetsInfo.mainTarget){
-            //console.log("ターゲットを読み込みました")
             mainClient.write(setFormat("send_main_target","mainClient",{mainTarget:targetsInfo.mainTarget}))
         }else{
             //ターゲットがないときにdataClientを接続させる

@@ -82,7 +82,12 @@ server.on("connection",(socket)=>{
                     userId = uuid.v4()
                     // systemMode = getData.data.systemMode
                     clientList.push({userId:userId,mainClientSocket:socket,dataClientSocket:undefined,targetInfo:{mainTarget:"",subTarget:""},rastPacketInfo:{rastPacketSize:0,splitDataListLength:0},systemMode:""})
-                    socket.write(setFormat("send_server_userId","server",userId))
+                    let sendUserList = clientList.map((i)=>{
+                        if (i.userId !== userId){
+                            return i.userId
+                        }
+                    })
+                    socket.write(setFormat("send_server_userId","server",{userId:userId,userList:sendUserList}))
                 }else if (getData.data.data === "dataClient"){
                     console.log("動いてるよ")
                     console.log("sys")
