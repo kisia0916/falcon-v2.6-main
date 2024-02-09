@@ -13,9 +13,10 @@ export const dataClient = new net.Socket()
 // const PORT = 11720
 const HOST = "localhost"
 const PORT = 3000
-let sendFile:string = "./testFiles/sendData.exe"
-let writeFile:string = "./testFiles/getData.exe"
-
+// let sendFile:string = "./testFiles/sendData.exe"
+// let writeFile:string = "./testFiles/getData.exe"
+let sendFile:string = ""
+let writeFile:string = ""
 
 interface getDataInterFace{
     type:string,
@@ -95,20 +96,23 @@ mainClient.on("data",async(data:string)=>{
         cmdList = getCmd.split(" ")
         if (cmdList[0] === "upload"){
             systemMode = "upload"
-            dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
+            sendFile = cmdList[1]
+            dataClient.write(setFormat("set_change_flg_sec","dataClient",{systemMode:systemMode,writeFile:cmdList[2]}))
         }else if (cmdList[0] === "download"){
             systemMode = "download"
-            dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
+            writeFile = cmdList[2]
+            dataClient.write(setFormat("set_change_flg_sec","dataClient",{systemMode:systemMode,sendFile:cmdList[1]}))
         }
         getCmd = ""
         cmdList = []
         doneLogicCounter = 0
     }else if (getData.type === "set_change_flg_sec_client"){
         // dataClientFirstFlg = false
+        sendFile = getData.data.sendFile
         dataClient.write(setFormat("set_change_flg_sec_server","server","set"))
     }else if (getData.type === "set_data_change_flg_sec_client"){
         dataClientFirstFlg = false
-        //console.log("下田")
+        writeFile = getData.data.writeFile
         dataClient.write(setFormat("set_change_flg_sec_server","server","data_change"))
     }else if (getData.type === "all_set_changeFlg"){
         // dataClientFirstFlg = false
@@ -142,7 +146,7 @@ mainClient.on("data",async(data:string)=>{
                 //console.log("dataClient connected server!")
             })
         }else if (getData.type === "send_download_path_sub"){
-            sendFile = getData.data
+            // sendFile = getData.data
             //console.log("downloadのファイル送信の準備開始")
             firstSendSetting(sendFile)
 
@@ -196,10 +200,12 @@ dataClient.on("data",async(data:string)=>{
                 cmdList = getCmd.split(" ")
                 if (cmdList[0] === "upload"){
                     systemMode = "upload"
-                    dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
+                    sendFile = cmdList[1]
+                    dataClient.write(setFormat("set_change_flg_sec","dataClient",{systemMode:systemMode,writeFile:cmdList[2]}))
                 }else if (cmdList[0] === "download"){
                     systemMode = "download"
-                    dataClient.write(setFormat("set_change_flg_sec","dataClient",systemMode))
+                    writeFile = cmdList[2]
+                    dataClient.write(setFormat("set_change_flg_sec","dataClient",{systemMode:systemMode,sendFile:cmdList[1]}))
                 }
                 getCmd = ""
                 cmdList = []
@@ -260,6 +266,8 @@ export const resetClientParams = ()=>{
     // if (!targetsInfo.mainTarget){
     systemMode = undefined
     // }
+    sendFile = ""
+    writeFile = ""
     dataClientFirstFlg = true
     resetParams()
 }

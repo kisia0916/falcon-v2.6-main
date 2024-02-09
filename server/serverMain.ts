@@ -193,18 +193,18 @@ server.on("connection",(socket)=>{
             }
             else if (getData.type === "set_change_flg_sec"){
                 ///dataClient用
-                if (getData.data === "upload"){
+                if (getData.data.systemMode === "upload"){
                     changeJsonFlg = false
                     const mainTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.mainTarget)
                     if (mainTargetIndex !== -1){
                         // clientList[myIndex].mainClientSocket.write(setFormat("all_set_changeFlg","server","done"))
-                        clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_data_change_flg_sec_client","server","set"))
+                        clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_data_change_flg_sec_client","server",{writeFile:getData.data.writeFile}))
                     }
                     console.log("setDone")
-                }else if (getData.data === "download"){
+                }else if (getData.data.systemMode === "download"){
                     const mainTargetIndex = clientList.findIndex((i)=>i.userId === targetsInfo.mainTarget)
                     if (mainTargetIndex !== -1){
-                        clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_change_flg_sec_client","server","set"))
+                        clientList[mainTargetIndex].mainClientSocket.write(setFormat("set_change_flg_sec_client","server",{sendFile:getData.data.sendFile}))
                     }
                 }
             }else if (getData.type === "set_change_flg_sec_server"){
