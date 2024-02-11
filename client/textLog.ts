@@ -25,6 +25,7 @@ export const loadTextAniRun = (beforeText:string)=>{
 const loadBoxNum = 20
 let maxSizeMain = 0
 let beforePa:number = 0
+let beforeTextBack:string = ""
 // let nowContentSize = 0
 const readRateAni = (beforeText:string)=>{
     let nowContentSize = nowSendedSize
@@ -81,13 +82,15 @@ export const rastLoadWrite = (beforeText:string)=>{
     for (let i = 0;loadBoxNum>i;i++){
         box+="■"
     }
-    console.log(`${beforeText} [${box}]100%`)
-    console.log("\x1b[32mUpload done!"+"\x1b[39m")
+    console.log(`${beforeTextBack}ing file [${box}]100%`)
+    console.log(`\x1b[32m${beforeTextBack} done!`+"\x1b[39m")
+    beforeTextBack = ""
 }
 
 export const readRateAniRun = (beforeText:string,maxSize:number,systemMode:"upload"|"download")=>{
     maxSizeMain = maxSize
     beforePa = 0
+    beforeTextBack = systemMode
     if (systemMode === "upload"){
         setTimeout(()=>readRateAni(beforeText),10)
     }else if (systemMode === "download"){
